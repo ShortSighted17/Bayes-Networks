@@ -1,44 +1,3 @@
-"""
-Inference Engine for Bayesian Networks
-
-This module implements probabilistic inference using Variable Elimination.
-
-VARIABLE ELIMINATION ALGORITHM
-==============================
-
-Variable Elimination is an exact inference algorithm that efficiently
-computes posterior probabilities P(Query | Evidence).
-
-The key insight: When computing a marginal probability, we can push sums
-inside products, eliminating variables one at a time rather than 
-summing over all possible assignments.
-
-Basic steps:
-1. Initialize factors from the CPTs
-2. Observe evidence by reducing factors
-3. For each hidden variable (not query, not evidence):
-   - Multiply all factors containing that variable
-   - Sum out the variable
-4. Multiply remaining factors
-5. Normalize to get probabilities
-
-FACTORS
-=======
-
-A factor is a function that maps variable assignments to real numbers.
-For example, P(F1 | W) is a factor over variables {F1, W}.
-
-We represent factors as dictionaries mapping tuples of assignments to values.
-For example:
-{
-    ('mild', 'true'): 0.2,
-    ('mild', 'false'): 0.8,
-    ('stormy', 'true'): 0.4,
-    ...
-}
-
-"""
-
 from typing import Dict, List, Tuple, Set, Optional, FrozenSet
 from dataclasses import dataclass
 from bayes_network import BayesianNetwork
@@ -48,13 +7,6 @@ from collections import defaultdict
 
 @dataclass(frozen=True)
 class Factor:
-    """
-    A factor is a function from variable assignments to real numbers.
-    
-    Attributes:
-        variables: Tuple of variable names this factor is over
-        table: Dictionary mapping assignments (tuple of values) to probabilities
-    """
     variables: Tuple[str, ...]
     table: Dict[Tuple[str, ...], float]
     
@@ -63,21 +15,8 @@ class Factor:
 
 
 class InferenceEngine:
-    """
-    Inference engine using Variable Elimination.
-    
-    Supports computing:
-    - P(variable | evidence) for any variable
-    - P(variables | evidence) for joint distributions
-    """
-    
+
     def __init__(self, bn: BayesianNetwork):
-        """
-        Initialize the inference engine with a Bayesian Network.
-        
-        Args:
-            bn: The Bayesian Network to perform inference on
-        """
         self.bn = bn
     
     # =====================================================
@@ -85,11 +24,6 @@ class InferenceEngine:
     # =====================================================
     
     def make_factor_weather(self) -> Factor:
-        """
-        Create factor for P(Weather).
-        
-        This is the prior distribution over weather states.
-        """
         variables = ('W',)
         table = {}
         
@@ -99,15 +33,6 @@ class InferenceEngine:
         return Factor(variables, table)
     
     def make_factor_flooding(self, edge_id: int) -> Factor:
-        """
-        Create factor for P(F_edge | Weather).
-        
-        Args:
-            edge_id: The edge ID
-            
-        Returns:
-            Factor over variables (W, F{edge_id})
-        """
         flood_var = f"F{edge_id}"
         variables = ('W', flood_var)
         table = {}
@@ -121,17 +46,6 @@ class InferenceEngine:
         return Factor(variables, table)
     
     def make_factor_evacuees(self, vertex: int) -> Factor:
-        """
-        Create factor for P(Ev_vertex | flooding of incident edges).
-        
-        Uses the noisy-OR model.
-        
-        Args:
-            vertex: The vertex ID
-            
-        Returns:
-            Factor over variables (F{e1}, F{e2}, ..., Ev{vertex})
-        """
         incident_edge_ids = self.bn.graph.vertex_edges.get(vertex, [])
         evac_var = f"Ev{vertex}"
         
@@ -165,9 +79,6 @@ class InferenceEngine:
         return Factor(variables, table)
     
     def get_all_factors(self) -> List[Factor]:
-        """
-        Get all factors from the Bayesian Network (one per CPT).
-        """
         factors = []
         
         # Weather prior
@@ -188,20 +99,6 @@ class InferenceEngine:
     # =====================================================
     
     def restrict_factor(self, factor: Factor, variable: str, value: str) -> Factor:
-        """
-        Restrict a factor by setting a variable to a specific value.
-        
-        This is used to incorporate evidence: if we observe X=x, we
-        restrict all factors containing X to only entries where X=x.
-        
-        Args:
-            factor: The factor to restrict
-            variable: Variable name to restrict
-            value: Value to restrict to
-            
-        Returns:
-            New factor with the variable removed
-        """
         if variable not in factor.variables:
             return factor  # Variable not in this factor
         
@@ -224,20 +121,6 @@ class InferenceEngine:
         return Factor(new_vars, new_table)
     
     def multiply_factors(self, factor1: Factor, factor2: Factor) -> Factor:
-        """
-        Multiply two factors together.
-        
-        The result is a factor over the union of variables from both factors.
-        For each assignment to the combined variables, the value is the
-        product of the values from both factors.
-        
-        Args:
-            factor1: First factor
-            factor2: Second factor
-            
-        Returns:
-            Product factor
-        """
         # Find union of variables (preserving order)
         vars1 = list(factor1.variables)
         vars2 = list(factor2.variables)
@@ -270,18 +153,6 @@ class InferenceEngine:
         return Factor(new_vars, new_table)
     
     def sum_out(self, factor: Factor, variable: str) -> Factor:
-        """
-        Sum out (marginalize) a variable from a factor.
-        
-        This removes the variable by summing over all its possible values.
-        
-        Args:
-            factor: The factor to marginalize
-            variable: Variable to sum out
-            
-        Returns:
-            New factor with variable removed
-        """
         if variable not in factor.variables:
             return factor
         
@@ -301,7 +172,6 @@ class InferenceEngine:
         return Factor(new_vars, dict(new_table))
     
     def _get_domains(self, variables: List[str]) -> Dict[str, List[str]]:
-        """Get the domain (possible values) for each variable."""
         domains = {}
         for v in variables:
             if v in self.bn.nodes:
@@ -313,15 +183,6 @@ class InferenceEngine:
         return domains
     
     def normalize_factor(self, factor: Factor) -> Factor:
-        """
-        Normalize a factor so its values sum to 1.
-        
-        Args:
-            factor: Factor to normalize
-            
-        Returns:
-            Normalized factor
-        """
         total = sum(factor.table.values())
         if total == 0:
             return factor
@@ -335,26 +196,6 @@ class InferenceEngine:
     
     def variable_elimination(self, query_vars: List[str], 
                             evidence: Dict[str, str]) -> Factor:
-        """
-        Perform Variable Elimination to compute P(query_vars | evidence).
-        
-        Algorithm:
-        1. Get all factors from the BN
-        2. Restrict factors by evidence
-        3. Determine elimination order for hidden variables
-        4. For each hidden variable:
-           - Multiply all factors containing it
-           - Sum out the variable
-        5. Multiply remaining factors
-        6. Normalize
-        
-        Args:
-            query_vars: List of variables to query
-            evidence: Dictionary mapping variable names to observed values
-            
-        Returns:
-            Factor representing P(query_vars | evidence)
-        """
         # Step 1: Get all factors
         factors = self.get_all_factors()
         
@@ -372,7 +213,6 @@ class InferenceEngine:
         hidden_vars = all_vars - query_set - evidence_set
         
         # Step 4: Eliminate hidden variables one by one
-        # Use a simple elimination order (could be optimized)
         elimination_order = self._get_elimination_order(hidden_vars, factors)
         
         for var in elimination_order:
@@ -407,12 +247,6 @@ class InferenceEngine:
     
     def _get_elimination_order(self, hidden_vars: Set[str], 
                                factors: List[Factor]) -> List[str]:
-        """
-        Get a good elimination order for hidden variables.
-        
-        A simple heuristic: eliminate variables that appear in the 
-        fewest factors first (min-degree heuristic).
-        """
         var_count = defaultdict(int)
         for var in hidden_vars:
             for f in factors:
@@ -427,16 +261,6 @@ class InferenceEngine:
     # =====================================================
     
     def query(self, query_var: str, evidence: Dict[str, str] = None) -> Dict[str, float]:
-        """
-        Compute P(query_var | evidence).
-        
-        Args:
-            query_var: Variable to query
-            evidence: Dictionary of observed variable-value pairs
-            
-        Returns:
-            Dictionary mapping values to probabilities
-        """
         if evidence is None:
             evidence = {}
         
@@ -468,26 +292,12 @@ class InferenceEngine:
     
     def query_path_clear(self, edge_ids: List[int], 
                          evidence: Dict[str, str] = None) -> float:
-        """
-        Compute P(all edges in path are NOT flooded | evidence).
-        
-        This is the probability that a path is completely clear.
-        
-        Args:
-            edge_ids: List of edge IDs forming the path
-            evidence: Dictionary of observed variable-value pairs
-            
-        Returns:
-            Probability that all edges are clear
-        """
         if evidence is None:
             evidence = {}
         
         # Create a copy of evidence
         extended_evidence = dict(evidence)
         
-        # We need to compute P(F1=false, F2=false, ... | evidence)
-        # One way: use variable elimination with joint query
         flood_vars = [f"F{eid}" for eid in edge_ids]
         
         result = self.variable_elimination(flood_vars, evidence)
@@ -501,11 +311,6 @@ class InferenceEngine:
         return prob_clear
     
     def print_all_posteriors(self, evidence: Dict[str, str] = None):
-        """
-        Print all posterior probabilities given evidence.
-        
-        This answers queries 1-3 from the assignment.
-        """
         if evidence is None:
             evidence = {}
         
