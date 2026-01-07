@@ -94,7 +94,8 @@ Evidence Management:
   
 Queries:
   all, posteriors  - Show all posterior probabilities given current evidence
-  prob <var>       - Query P(var | evidence)
+  prob <var>       - Query P(var | evidence) - shows full distribution
+  prob <var>=<val> - Query P(var=val | evidence) - shows single probability
   path <e1,e2,...> - Query P(path is clear | evidence)
   
 Display:
@@ -108,6 +109,12 @@ Variable Names:
   W                - Weather (values: mild, stormy, extreme)
   F<n>             - Flooding at edge n (values: true, false)
   Ev<n>            - Evacuees at vertex n (values: true, false)
+
+Examples:
+  add F1=true      - Add evidence that edge 1 is flooded
+  prob F5          - Show P(F5=true) and P(F5=false) given evidence
+  prob F5=true     - Show only P(F5=true) given evidence
+  path 1,2,3       - Show probability that edges 1, 2, 3 are all clear
         """)
     
     def reset_evidence(self):
@@ -175,19 +182,48 @@ Variable Names:
         # Extract variable name
         parts = cmd.split()
         if len(parts) < 2:
-            print("Usage: prob <variable>")
+            print("Usage: prob <variable> or prob <variable>=<value>")
             return
         
-        var = parts[1].strip()
+        var_spec = parts[1].strip()
         
-        if var not in self.bn.nodes:
+        # Check if user specified a specific value (e.g., "F5=true")
+        if '=' in var_spec:
+            var, requested_val = var_spec.split('=', 1)
+            var = var.strip()
+            requested_val = requested_val.strip().lower()
+        else:
+            var = var_spec
+            requested_val = None
+        
+        # Try to match variable name case-insensitively
+        matched_var = None
+        for node_name in self.bn.nodes:
+            if node_name.lower() == var.lower():
+                matched_var = node_name
+                break
+        
+        if matched_var is None:
             print(f"Unknown variable: {var}")
+            print(f"Valid variables: {', '.join(sorted(self.bn.nodes.keys()))}")
             return
+        
+        var = matched_var  # Use the correctly-cased name
         
         dist = self.engine.query(var, self.evidence)
-        print(f"\nP({var} | evidence):")
-        for val, prob in sorted(dist.items()):
-            print(f"  P({var}={val}) = {prob:.6f}")
+        
+        if requested_val:
+            # User asked for specific value
+            if requested_val in dist:
+                print(f"\nP({var}={requested_val} | evidence) = {dist[requested_val]:.6f}")
+            else:
+                print(f"Invalid value for {var}: {requested_val}")
+                print(f"Valid values: {list(dist.keys())}")
+        else:
+            # Show full distribution
+            print(f"\nP({var} | evidence):")
+            for val, prob in sorted(dist.items()):
+                print(f"  P({var}={val}) = {prob:.6f}")
     
     def query_path(self, spec: str):
         """
