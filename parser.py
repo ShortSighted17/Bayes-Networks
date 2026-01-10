@@ -1,33 +1,9 @@
-"""
-Parser for Assignment 3: Bayesian Network for Hurricane Evacuation
-
-This module parses input files that define:
-1. Graph structure (vertices and edges)
-2. Probability parameters for the Bayesian network
-
-Input file format example:
-    #V 4              ; number of vertices (1 to n)
-    #P1 0.3           ; noisy-or parameter for evacuees
-    #E1 1 3 W1 F 0.2  ; Edge from v1 to v3, weight 1, P(flood|mild)=0.2
-    #W 0.1 0.4 0.5    ; Prior: P(mild), P(stormy), P(extreme)
-"""
-
 from dataclasses import dataclass, field
 from typing import Dict, List, Tuple, Optional
 
 
 @dataclass
 class Edge:
-    """
-    Represents an edge in the graph.
-    
-    Attributes:
-        edge_id: Unique identifier for the edge
-        u: First vertex
-        v: Second vertex  
-        weight: Edge weight (used in noisy-or calculation for evacuees)
-        flood_prob_mild: P(Flooded | Weather=mild)
-    """
     edge_id: int
     u: int
     v: int
@@ -35,18 +11,6 @@ class Edge:
     flood_prob_mild: float  # P(Flooded | mild weather)
     
     def flood_prob_given_weather(self, weather: str) -> float:
-        """
-        Calculate P(Flooded | Weather).
-        
-        The flooding probability doubles for stormy weather and 
-        triples for extreme weather (capped at 1.0).
-        
-        Args:
-            weather: One of 'mild', 'stormy', 'extreme'
-            
-        Returns:
-            Probability of flooding given the weather condition
-        """
         if weather == 'mild':
             return self.flood_prob_mild
         elif weather == 'stormy':
@@ -59,53 +23,26 @@ class Edge:
 
 @dataclass
 class GraphData:
-    """
-    Contains all parsed data from the input file.
-    
-    Attributes:
-        num_vertices: Total number of vertices in the graph
-        edges: Dictionary mapping edge_id to Edge objects
-        p1: Parameter for noisy-or calculation of evacuees
-        weather_prior: Tuple of (P(mild), P(stormy), P(extreme))
-        vertex_edges: Maps each vertex to list of incident edge IDs
-    """
     num_vertices: int = 0
     edges: Dict[int, Edge] = field(default_factory=dict)
     p1: float = 0.3  # Default value for noisy-or parameter
-    weather_prior: Tuple[float, float, float] = (0.333, 0.333, 0.334)  # Default uniform-ish
+    weather_prior: Tuple[float, float, float] = (0.333, 0.333, 0.334)  # Default: uniform-ish
     vertex_edges: Dict[int, List[int]] = field(default_factory=dict)
     
     def get_vertices(self) -> List[int]:
-        """Return list of all vertex IDs (1 to n)"""
         return list(range(1, self.num_vertices + 1))
     
     def get_incident_edges(self, vertex: int) -> List[Edge]:
-        """Return all edges incident to a given vertex"""
         edge_ids = self.vertex_edges.get(vertex, [])
         return [self.edges[eid] for eid in edge_ids]
 
 
 def parse_file(file_path: str) -> GraphData:
-    """
-    Parse an input file and return the graph data.
-    
-    The parser handles the following directives:
-    - #V n          : Number of vertices
-    - #P1 value     : Noisy-or parameter  
-    - #En u v Ww F p: Edge n from u to v, weight w, flood prob p (given mild)
-    - #W p1 p2 p3   : Weather prior distribution
-    
-    Args:
-        file_path: Path to the input file
-        
-    Returns:
-        GraphData object containing all parsed information
-    """
     data = GraphData()
     
     with open(file_path, 'r') as f:
         for line in f:
-            # Remove comments (everything after semicolon)
+            # strip comments
             line = line.split(';')[0].strip()
             if not line:
                 continue
@@ -136,7 +73,7 @@ def parse_file(file_path: str) -> GraphData:
                 u = int(parts[1])
                 v = int(parts[2])
                 
-                # Parse weight (format: W followed by number)
+                # Parse weight
                 weight = 1  # Default weight
                 flood_prob = 0.0  # Default: not flooded
                 
@@ -163,9 +100,6 @@ def parse_file(file_path: str) -> GraphData:
 
 
 def print_graph_data(data: GraphData):
-    """
-    Print a summary of the parsed graph data for debugging.
-    """
     print(f"Number of vertices: {data.num_vertices}")
     print(f"P1 parameter: {data.p1}")
     print(f"Weather prior: mild={data.weather_prior[0]}, "

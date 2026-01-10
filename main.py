@@ -1,20 +1,3 @@
-"""
-Main Program for Assignment 3: Bayesian Network for Hurricane Evacuation
-
-This is the interactive main program that:
-1. Reads the input file and constructs the Bayesian Network
-2. Displays the network structure and CPTs
-3. Allows the user to:
-   - Add/reset evidence
-   - Query probabilities
-   - Find safest paths (bonus)
-
-Usage:
-    python main.py [input_file]
-    
-If no input file is provided, uses a default test file.
-"""
-
 import sys
 from parser import parse_file, print_graph_data
 from bayes_network import BayesianNetwork
@@ -22,17 +5,12 @@ from inference import InferenceEngine
 
 
 class InteractiveSession:
-    """
-    Manages an interactive session for querying the Bayesian Network.
-    """
-    
     def __init__(self, bn: BayesianNetwork, engine: InferenceEngine):
         self.bn = bn
         self.engine = engine
         self.evidence = {}  # Current evidence
     
     def run(self):
-        """Run the interactive session."""
         print("\n" + "=" * 60)
         print("BAYESIAN NETWORK INTERACTIVE SESSION")
         print("=" * 60)
@@ -80,7 +58,6 @@ class InteractiveSession:
                 print(f"Error: {e}")
     
     def print_help(self):
-        """Print available commands."""
         print("""
 Available Commands:
 -------------------
@@ -118,12 +95,10 @@ Examples:
         """)
     
     def reset_evidence(self):
-        """Clear all evidence."""
         self.evidence = {}
         print("Evidence cleared.")
     
     def show_evidence(self):
-        """Display current evidence."""
         if self.evidence:
             print("Current evidence:")
             for var, val in self.evidence.items():
@@ -132,11 +107,6 @@ Examples:
             print("No evidence set.")
     
     def add_evidence(self, spec: str):
-        """
-        Add evidence from a specification string.
-        
-        Format: var=value (e.g., 'F1=true', 'W=stormy', 'Ev2=false')
-        """
         try:
             parts = spec.strip().split('=')
             if len(parts) != 2:
@@ -174,11 +144,9 @@ Examples:
             print(f"Error adding evidence: {e}")
     
     def show_all_posteriors(self):
-        """Show all posterior probabilities given current evidence."""
         self.engine.print_all_posteriors(self.evidence)
     
     def query_probability(self, cmd: str):
-        """Query probability of a specific variable."""
         # Extract variable name
         parts = cmd.split()
         if len(parts) < 2:
@@ -226,11 +194,6 @@ Examples:
                 print(f"  P({var}={val}) = {prob:.6f}")
     
     def query_path(self, spec: str):
-        """
-        Query probability that a path is clear.
-        
-        Format: comma-separated edge IDs (e.g., '1,2,3')
-        """
         try:
             edge_ids = [int(e.strip()) for e in spec.split(',')]
             
@@ -250,11 +213,6 @@ Examples:
             print("Example: path 1,2,3")
     
     def find_safest_path(self):
-        """
-        Find the safest path between two vertices (bonus feature).
-        
-        This finds the path with highest probability of being clear.
-        """
         try:
             start = int(input("Start vertex: "))
             goal = int(input("Goal vertex: "))
@@ -296,13 +254,7 @@ Examples:
     
     def _find_all_paths(self, start: int, goal: int, 
                         max_length: int = 10) -> list:
-        """
-        Find all simple paths from start to goal.
-        
-        Returns list of paths, where each path is a list of edge IDs.
-        """
         paths = []
-        
         # DFS to find all paths
         def dfs(current: int, target: int, visited: set, path_edges: list):
             if current == target:
@@ -330,7 +282,6 @@ Examples:
 
 
 def main():
-    """Main entry point."""
     print("=" * 60)
     print("HURRICANE EVACUATION - BAYESIAN NETWORK (Assignment 3)")
     print("=" * 60)
