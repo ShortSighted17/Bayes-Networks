@@ -1,0 +1,273 @@
+python .\main.py
+============================================================
+HURRICANE EVACUATION - BAYESIAN NETWORK (Assignment 3)
+============================================================
+Enter input file path [test_input.txt]: scenario2.txt
+
+Loading graph from: scenario2.txt
+Graph loaded successfully!
+Number of vertices: 5
+P1 parameter: 0.4
+Weather prior: mild=0.2, stormy=0.3, extreme=0.5
+
+Edges:
+  E1: 1 -- 2, weight=2, P(flood|mild)=0.1
+  E2: 1 -- 3, weight=1, P(flood|mild)=0.4
+  E3: 2 -- 4, weight=2, P(flood|mild)=0.2
+  E4: 3 -- 4, weight=3, P(flood|mild)=0.1
+  E5: 4 -- 5, weight=1, P(flood|mild)=0.3
+
+Vertex-Edge incidence:
+  V1: incident edges = [1, 2]
+  V2: incident edges = [1, 3]
+  V3: incident edges = [2, 4]
+  V4: incident edges = [3, 4, 5]
+  V5: incident edges = [5]
+
+Constructing Bayesian Network...
+============================================================
+BAYESIAN NETWORK STRUCTURE
+============================================================
+
+Nodes and their relationships:
+
+  Ev1:
+    Domain: ['true', 'false']
+    Parents: ['F1', 'F2']
+    Children: None (leaf)
+
+  Ev2:
+    Domain: ['true', 'false']
+    Parents: ['F1', 'F3']
+    Children: None (leaf)
+
+  Ev3:
+    Domain: ['true', 'false']
+    Parents: ['F2', 'F4']
+    Children: None (leaf)
+
+  Ev4:
+    Domain: ['true', 'false']
+    Parents: ['F3', 'F4', 'F5']
+    Children: None (leaf)
+
+  Ev5:
+    Domain: ['true', 'false']
+    Parents: ['F5']
+    Children: None (leaf)
+
+  F1:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev1', 'Ev2']
+
+  F2:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev1', 'Ev3']
+
+  F3:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev2', 'Ev4']
+
+  F4:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev3', 'Ev4']
+
+  F5:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev4', 'Ev5']
+
+  W:
+    Domain: ['mild', 'stormy', 'extreme']
+    Parents: None (root)
+    Children: ['F1', 'F2', 'F3', 'F4', 'F5']
+
+============================================================
+CONDITIONAL PROBABILITY TABLES
+============================================================
+
+WEATHER:
+  P(mild) = 0.2
+  P(stormy) = 0.3
+  P(extreme) = 0.5
+
+EDGE 1 (connects 1 -- 2, weight=2):
+  P(flooded | mild) = 0.1
+  P(flooded | stormy) = 0.2
+  P(flooded | extreme) = 0.30000000000000004
+
+EDGE 2 (connects 1 -- 3, weight=1):
+  P(flooded | mild) = 0.4
+  P(flooded | stormy) = 0.8
+  P(flooded | extreme) = 1.0
+
+EDGE 3 (connects 2 -- 4, weight=2):
+  P(flooded | mild) = 0.2
+  P(flooded | stormy) = 0.4
+  P(flooded | extreme) = 0.6000000000000001
+
+EDGE 4 (connects 3 -- 4, weight=3):
+  P(flooded | mild) = 0.1
+  P(flooded | stormy) = 0.2
+  P(flooded | extreme) = 0.30000000000000004
+
+EDGE 5 (connects 4 -- 5, weight=1):
+  P(flooded | mild) = 0.3
+  P(flooded | stormy) = 0.6
+  P(flooded | extreme) = 0.8999999999999999
+
+VERTEX 1 (incident edges: [1, 2]):
+  P(Evacuees | not flooded 1, not flooded 2) = 0.0000
+  P(Evacuees | not flooded 1, flooded 2) = 0.6000
+  P(Evacuees | flooded 1, not flooded 2) = 0.8000
+  P(Evacuees | flooded 1, flooded 2) = 0.9200
+
+VERTEX 2 (incident edges: [1, 3]):
+  P(Evacuees | not flooded 1, not flooded 3) = 0.0000
+  P(Evacuees | not flooded 1, flooded 3) = 0.8000
+  P(Evacuees | flooded 1, not flooded 3) = 0.8000
+  P(Evacuees | flooded 1, flooded 3) = 0.9600
+
+VERTEX 3 (incident edges: [2, 4]):
+  P(Evacuees | not flooded 2, not flooded 4) = 0.0000
+  P(Evacuees | not flooded 2, flooded 4) = 0.8667
+  P(Evacuees | flooded 2, not flooded 4) = 0.6000
+  P(Evacuees | flooded 2, flooded 4) = 0.9467
+
+VERTEX 4 (incident edges: [3, 4, 5]):
+  P(Evacuees | not flooded 3, not flooded 4, not flooded 5) = 0.0000
+  P(Evacuees | not flooded 3, not flooded 4, flooded 5) = 0.6000
+  P(Evacuees | not flooded 3, flooded 4, not flooded 5) = 0.8667
+  P(Evacuees | not flooded 3, flooded 4, flooded 5) = 0.9467
+  P(Evacuees | flooded 3, not flooded 4, not flooded 5) = 0.8000
+  P(Evacuees | flooded 3, not flooded 4, flooded 5) = 0.9200
+  P(Evacuees | flooded 3, flooded 4, not flooded 5) = 0.9733
+  P(Evacuees | flooded 3, flooded 4, flooded 5) = 0.9893
+
+VERTEX 5 (incident edges: [5]):
+  P(Evacuees | not flooded 5) = 0.0000
+  P(Evacuees | flooded 5) = 0.6000
+
+============================================================
+BAYESIAN NETWORK INTERACTIVE SESSION
+============================================================
+
+Available Commands:
+-------------------
+  help, h          - Show this help message
+  quit, q          - Exit the program
+
+Evidence Management:
+  reset, r         - Clear all evidence
+  evidence, e      - Show current evidence
+  add <var>=<val>  - Add evidence (e.g., 'add F1=true', 'add W=stormy')
+
+Queries:
+  all, posteriors  - Show all posterior probabilities given current evidence
+  prob <var>       - Query P(var | evidence) - shows full distribution
+  prob <var>=<val> - Query P(var=val | evidence) - shows single probability
+  path <e1,e2,...> - Query P(path is clear | evidence)
+
+Display:
+  bn, network      - Show network structure
+  cpt, cpts        - Show all conditional probability tables
+
+Bonus:
+  best, safest     - Find safest path between two vertices
+
+Variable Names:
+  W                - Weather (values: mild, stormy, extreme)
+  F<n>             - Flooding at edge n (values: true, false)
+  Ev<n>            - Evacuees at vertex n (values: true, false)
+
+Examples:
+  add F1=true      - Add evidence that edge 1 is flooded
+  prob F5          - Show P(F5=true) and P(F5=false) given evidence
+  prob F5=true     - Show only P(F5=true) given evidence
+  path 1,2,3       - Show probability that edges 1, 2, 3 are all clear
+
+
+> best
+Start vertex: 1
+Goal vertex: 5
+
+Found 2 path(s) from 1 to 5:
+  Path [E1 -> E3 -> E5]: P(clear) = 0.172400
+  Path [E2 -> E4 -> E5]: P(clear) = 0.094800
+
+Safest path: [E1 -> E3 -> E5] with P(clear) = 0.172400
+
+> add F5=true
+Added evidence: F5 = true
+
+> best
+Start vertex: 1
+Goal vertex: 5
+
+Found 2 path(s) from 1 to 5:
+  Path [E1 -> E3 -> E5]: P(clear) = 0.000000
+  Path [E2 -> E4 -> E5]: P(clear) = 0.000000
+
+Safest path: [E1 -> E3 -> E5] with P(clear) = 0.000000
+
+> all
+
+============================================================
+POSTERIOR PROBABILITIES
+Evidence: {'F5': 'true'}
+============================================================
+
+Weather Distribution:
+  P(Weather=mild | evidence) = 0.086957
+  P(Weather=stormy | evidence) = 0.260870
+  P(Weather=extreme | evidence) = 0.652174
+
+Flooding Probabilities:
+  P(F1=true | evidence) = 0.256522
+  P(F2=true | evidence) = 0.895652
+  P(F3=true | evidence) = 0.513043
+  P(F4=true | evidence) = 0.256522
+  P(F5=true | evidence) = 1.000000
+
+Evacuees Probabilities:
+  P(Ev1=true | evidence) = 0.626991
+  P(Ev2=true | evidence) = 0.526052
+  P(Ev3=true | evidence) = 0.634458
+  P(Ev4=true | evidence) = 0.814275
+  P(Ev5=true | evidence) = 0.600000
+
+> reset
+Evidence cleared.
+
+> all
+
+============================================================
+POSTERIOR PROBABILITIES
+Evidence: None (prior probabilities)
+============================================================
+
+Weather Distribution:
+  P(Weather=mild | evidence) = 0.200000
+  P(Weather=stormy | evidence) = 0.300000
+  P(Weather=extreme | evidence) = 0.500000
+
+Flooding Probabilities:
+  P(F1=true | evidence) = 0.230000
+  P(F2=true | evidence) = 0.820000
+  P(F3=true | evidence) = 0.460000
+  P(F4=true | evidence) = 0.230000
+  P(F5=true | evidence) = 0.690000
+
+Evacuees Probabilities:
+  P(Ev1=true | evidence) = 0.577120
+  P(Ev2=true | evidence) = 0.476480
+  P(Ev3=true | evidence) = 0.584213
+  P(Ev4=true | evidence) = 0.677746
+  P(Ev5=true | evidence) = 0.414000
+
+> quit
+Goodbye!
