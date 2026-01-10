@@ -1,0 +1,277 @@
+python .\main.py
+============================================================
+HURRICANE EVACUATION - BAYESIAN NETWORK (Assignment 3)
+============================================================
+Enter input file path [test_input.txt]: test_input.txt
+
+Loading graph from: test_input.txt
+Graph loaded successfully!
+Number of vertices: 4
+P1 parameter: 0.3
+Weather prior: mild=0.1, stormy=0.4, extreme=0.5
+
+Edges:
+  E1: 1 -- 3, weight=1, P(flood|mild)=0.2
+  E2: 2 -- 3, weight=3, P(flood|mild)=0.1
+  E3: 2 -- 4, weight=3, P(flood|mild)=0.3
+  E4: 3 -- 4, weight=4, P(flood|mild)=0.0
+
+Vertex-Edge incidence:
+  V1: incident edges = [1]
+  V2: incident edges = [2, 3]
+  V3: incident edges = [1, 2, 4]
+  V4: incident edges = [3, 4]
+
+Constructing Bayesian Network...
+============================================================
+BAYESIAN NETWORK STRUCTURE
+============================================================
+
+Nodes and their relationships:
+
+  Ev1:
+    Domain: ['true', 'false']
+    Parents: ['F1']
+    Children: None (leaf)
+
+  Ev2:
+    Domain: ['true', 'false']
+    Parents: ['F2', 'F3']
+    Children: None (leaf)
+
+  Ev3:
+    Domain: ['true', 'false']
+    Parents: ['F1', 'F2', 'F4']
+    Children: None (leaf)
+
+  Ev4:
+    Domain: ['true', 'false']
+    Parents: ['F3', 'F4']
+    Children: None (leaf)
+
+  F1:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev1', 'Ev3']
+
+  F2:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev2', 'Ev3']
+
+  F3:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev2', 'Ev4']
+
+  F4:
+    Domain: ['true', 'false']
+    Parents: ['W']
+    Children: ['Ev3', 'Ev4']
+
+  W:
+    Domain: ['mild', 'stormy', 'extreme']
+    Parents: None (root)
+    Children: ['F1', 'F2', 'F3', 'F4']
+
+============================================================
+CONDITIONAL PROBABILITY TABLES
+============================================================
+
+WEATHER:
+  P(mild) = 0.1
+  P(stormy) = 0.4
+  P(extreme) = 0.5
+
+EDGE 1 (connects 1 -- 3, weight=1):
+  P(flooded | mild) = 0.2
+  P(flooded | stormy) = 0.4
+  P(flooded | extreme) = 0.6000000000000001
+
+EDGE 2 (connects 2 -- 3, weight=3):
+  P(flooded | mild) = 0.1
+  P(flooded | stormy) = 0.2
+  P(flooded | extreme) = 0.30000000000000004
+
+EDGE 3 (connects 2 -- 4, weight=3):
+  P(flooded | mild) = 0.3
+  P(flooded | stormy) = 0.6
+  P(flooded | extreme) = 0.8999999999999999
+
+EDGE 4 (connects 3 -- 4, weight=4):
+  P(flooded | mild) = 0.0
+  P(flooded | stormy) = 0.0
+  P(flooded | extreme) = 0.0
+
+VERTEX 1 (incident edges: [1]):
+  P(Evacuees | not flooded 1) = 0.0000
+  P(Evacuees | flooded 1) = 0.7000
+
+VERTEX 2 (incident edges: [2, 3]):
+  P(Evacuees | not flooded 2, not flooded 3) = 0.0000
+  P(Evacuees | not flooded 2, flooded 3) = 0.9000
+  P(Evacuees | flooded 2, not flooded 3) = 0.9000
+  P(Evacuees | flooded 2, flooded 3) = 0.9900
+
+VERTEX 3 (incident edges: [1, 2, 4]):
+  P(Evacuees | not flooded 1, not flooded 2, not flooded 4) = 0.0000
+  P(Evacuees | not flooded 1, not flooded 2, flooded 4) = 0.9250
+  P(Evacuees | not flooded 1, flooded 2, not flooded 4) = 0.9000
+  P(Evacuees | not flooded 1, flooded 2, flooded 4) = 0.9925
+  P(Evacuees | flooded 1, not flooded 2, not flooded 4) = 0.7000
+  P(Evacuees | flooded 1, not flooded 2, flooded 4) = 0.9775
+  P(Evacuees | flooded 1, flooded 2, not flooded 4) = 0.9700
+  P(Evacuees | flooded 1, flooded 2, flooded 4) = 0.9978
+
+VERTEX 4 (incident edges: [3, 4]):
+  P(Evacuees | not flooded 3, not flooded 4) = 0.0000
+  P(Evacuees | not flooded 3, flooded 4) = 0.9250
+  P(Evacuees | flooded 3, not flooded 4) = 0.9000
+  P(Evacuees | flooded 3, flooded 4) = 0.9925
+
+============================================================
+BAYESIAN NETWORK INTERACTIVE SESSION
+============================================================
+
+Available Commands:
+-------------------
+  help, h          - Show this help message
+  quit, q          - Exit the program
+
+Evidence Management:
+  reset, r         - Clear all evidence
+  evidence, e      - Show current evidence
+  add <var>=<val>  - Add evidence (e.g., 'add F1=true', 'add W=stormy')
+
+Queries:
+  all, posteriors  - Show all posterior probabilities given current evidence
+  prob <var>       - Query P(var | evidence) - shows full distribution
+  prob <var>=<val> - Query P(var=val | evidence) - shows single probability
+  path <e1,e2,...> - Query P(path is clear | evidence)
+
+Display:
+  bn, network      - Show network structure
+  cpt, cpts        - Show all conditional probability tables
+
+Bonus:
+  best, safest     - Find safest path between two vertices
+
+Variable Names:
+  W                - Weather (values: mild, stormy, extreme)
+  F<n>             - Flooding at edge n (values: true, false)
+  Ev<n>            - Evacuees at vertex n (values: true, false)
+
+Examples:
+  add F1=true      - Add evidence that edge 1 is flooded
+  prob F5          - Show P(F5=true) and P(F5=false) given evidence
+  prob F5=true     - Show only P(F5=true) given evidence
+  path 1,2,3       - Show probability that edges 1, 2, 3 are all clear
+
+
+> all
+
+============================================================
+POSTERIOR PROBABILITIES
+Evidence: None (prior probabilities)
+============================================================
+
+Weather Distribution:
+  P(Weather=mild | evidence) = 0.100000
+  P(Weather=stormy | evidence) = 0.400000
+  P(Weather=extreme | evidence) = 0.500000
+
+Flooding Probabilities:
+  P(F1=true | evidence) = 0.480000
+  P(F2=true | evidence) = 0.240000
+  P(F3=true | evidence) = 0.720000
+  P(F4=true | evidence) = 0.000000
+
+Evacuees Probabilities:
+  P(Ev1=true | evidence) = 0.336000
+  P(Ev2=true | evidence) = 0.713340
+  P(Ev3=true | evidence) = 0.473880
+  P(Ev4=true | evidence) = 0.648000
+
+> add F3=true
+Added evidence: F3 = true
+
+> all
+
+============================================================
+POSTERIOR PROBABILITIES
+Evidence: {'F3': 'true'}
+============================================================
+
+Weather Distribution:
+  P(Weather=mild | evidence) = 0.041667
+  P(Weather=stormy | evidence) = 0.333333
+  P(Weather=extreme | evidence) = 0.625000
+
+Flooding Probabilities:
+  P(F1=true | evidence) = 0.516667
+  P(F2=true | evidence) = 0.258333
+  P(F3=true | evidence) = 1.000000
+  P(F4=true | evidence) = 0.000000
+
+Evacuees Probabilities:
+  P(Ev1=true | evidence) = 0.361667
+  P(Ev2=true | evidence) = 0.923250
+  P(Ev3=true | evidence) = 0.505967
+  P(Ev4=true | evidence) = 0.900000
+
+> add F2=true
+Added evidence: F2 = true
+
+> all        
+
+============================================================
+POSTERIOR PROBABILITIES
+Evidence: {'F3': 'true', 'F2': 'true'}
+============================================================
+
+Weather Distribution:
+  P(Weather=mild | evidence) = 0.016129
+  P(Weather=stormy | evidence) = 0.258065
+  P(Weather=extreme | evidence) = 0.725806
+
+Flooding Probabilities:
+  P(F1=true | evidence) = 0.541935
+  P(F2=true | evidence) = 1.000000
+  P(F3=true | evidence) = 1.000000
+  P(F4=true | evidence) = 0.000000
+
+Evacuees Probabilities:
+  P(Ev1=true | evidence) = 0.379355
+  P(Ev2=true | evidence) = 0.990000
+  P(Ev3=true | evidence) = 0.937935
+  P(Ev4=true | evidence) = 0.900000
+
+> add W=extreme
+Added evidence: W = extreme
+
+> all
+
+============================================================
+POSTERIOR PROBABILITIES
+Evidence: {'F3': 'true', 'F2': 'true', 'W': 'extreme'}
+============================================================
+
+Weather Distribution:
+  P(Weather=mild | evidence) = 0.000000
+  P(Weather=stormy | evidence) = 0.000000
+  P(Weather=extreme | evidence) = 1.000000
+
+Flooding Probabilities:
+  P(F1=true | evidence) = 0.600000
+  P(F2=true | evidence) = 1.000000
+  P(F3=true | evidence) = 1.000000
+  P(F4=true | evidence) = 0.000000
+
+Evacuees Probabilities:
+  P(Ev1=true | evidence) = 0.420000
+  P(Ev2=true | evidence) = 0.990000
+  P(Ev3=true | evidence) = 0.942000
+  P(Ev4=true | evidence) = 0.900000
+
+> quit
+Goodbye!
