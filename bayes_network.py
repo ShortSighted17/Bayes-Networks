@@ -214,7 +214,7 @@ class BayesianNetwork:
                 edge = self.graph.edges[eid]
                 # qi = min(1, P1 / weight)
                 qi = min(1.0, self.graph.p1 / edge.weight)
-                prob_no_evacuees *= (1.0 - qi)
+                prob_no_evacuees *= qi
         
         prob_evacuees = 1.0 - prob_no_evacuees
         
